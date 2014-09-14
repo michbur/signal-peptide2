@@ -1,0 +1,49 @@
+pos_seqs <- read_uniprot("sept_signal.txt", euk = TRUE)
+neg_seqs <- read.fasta("sept_neg.fasta", seqtype = "AA")
+#remove sequences with atypical aminoacids
+atyp_aa <- which(sapply(neg_seqs, function(i) any(i %in% c("X", "J", "Z", "B"))))
+too_short <- which(sapply(neg_seqs, length) < 50)
+neg_seqs_pure <- neg_seqs[-unique(c(atyp_aa, too_short))]
+
+
+
+#jackknife --------------------------------
+#proteins with signal peptides
+
+jack_pos <- pblapply(1L:5, function(protein_id) try({
+  model_jack <- hsmm(pos_seqs[-protein_id], aaaggregation)
+  predict.signal.hsmm(model_jack, pos_seqs[[protein_id]])
+}, silent = TRUE))
+
+model_jack_full <- hsmm(pos_seqs, aaaggregation)
+jack_neg <- pblapply(1L:length(neg_seqs_pure), function(protein_id) try({
+  predict.signal.hsmm(model_jack_full, neg_seqs_pure[[protein_id]])
+}, silent = TRUE))
+
+save(jack_pos, jack_neg, file = "jackknife.RData")
+
+#cross-validation --------------------------------
+#proteins with signal peptides
+
+multifolds <- pblapply(1L:1000, function(dummy_variable) {
+  
+  pos_ids <- cvFolds(length(pos_seqs), K = 5)
+  cv_neg <- neg_seqs_pure[sample(1L:length(neg_seqs_pure), length(pos_seqs))]
+  
+  fold_res <- lapply(1L:5, function(fold) {
+    model_cv <- hsmm(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], aaaggregation)
+    test_dat <- c(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] != fold]],
+                  cv_neg[pos_ids[[4]][,][pos_ids[[5]] != fold]])
+    pblapply(1L:length(test_dat), function(protein_id) try({
+      predict.signal.hsmm(model_cv, test_dat[[protein_id]])
+    }, silent = TRUE))
+  })
+  
+  lapply(fold_res, function(fold)
+    sapply(fold, function(i)
+      if(class(i) != "try-error") {
+        i[[1]][["sp_probability"]]
+      } else {
+        NA
+      }))
+})
