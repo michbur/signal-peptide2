@@ -47,3 +47,5 @@ multifolds <- pblapply(1L:1000, function(dummy_variable) {
         NA
       }))
 })
+
+save(multifolds, file = "crossval.RData")
