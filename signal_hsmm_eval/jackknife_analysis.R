@@ -17,8 +17,12 @@ TN <- as.numeric(jack_res[["TN"]])
 FN <- as.numeric(jack_res[["FN"]])
 
 jack_res <- t(jack_res)
+<<<<<<< HEAD
 jack_res <- rbind(jack_res, MCC = (TP*TN - FP*FN)/sqrt((TP + FP)*(TP + FN)*(TN + FP)*(TN + FN)))
 save(jack_res, file = "jackknife_results.RData")
+=======
+jack_res <- rbind(jack_res, MCC = (TP*TN - FP*FN)/((TP + FP)*(TP + FN)*(TN + FP)*(TN + FN)))
+>>>>>>> 70c2f87ff5944a529462eabb62c27b1a28e2f3d4
 write.table(jack_res, file = "jackknife_table.txt", sep = "\t")
 
 real_labels2 <- c(rep(1, length(jack_pos_prob)),

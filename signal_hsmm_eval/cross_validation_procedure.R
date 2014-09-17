@@ -46,6 +46,6 @@ system.time(multifolds <- lapply(1L:2, function(dummy_variable) {
       } else {
         NA
       }))
-}))
+
 
 save(multifolds, file = "crossval.RData")
