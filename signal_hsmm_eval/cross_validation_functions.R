@@ -3,6 +3,8 @@ library(hmeasure)
 library(signal.hsmm)
 library(pbapply)
 library(cvTools)
+library(parallel)
+library(snow)
 
 
 # SIGNAL-HSMM ------------------------------------

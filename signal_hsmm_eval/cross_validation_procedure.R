@@ -10,7 +10,7 @@ neg_seqs_pure <- neg_seqs[-unique(c(atyp_aa, too_short))]
 #jackknife --------------------------------
 #proteins with signal peptides
 
-jack_pos <- pblapply(1L:5, function(protein_id) try({
+jack_pos <- pblapply(1L:length(pos_seqs), function(protein_id) try({
   model_jack <- hsmm(pos_seqs[-protein_id], aaaggregation)
   predict.signal.hsmm(model_jack, pos_seqs[[protein_id]])
 }, silent = TRUE))
@@ -25,20 +25,22 @@ save(jack_pos, jack_neg, file = "jackknife.RData")
 #cross-validation --------------------------------
 #proteins with signal peptides
 
-multifolds <- pblapply(1L:2, function(dummy_variable) {
-  
+cl <- makeCluster(4, type = "SOCK")
+clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision"))
+
+multifolds_cl <- lapply(1L:50, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs_pure[sample(1L:length(neg_seqs_pure), length(pos_seqs))]
   
-  fold_res <- lapply(1L:5, function(fold) {
+  fold_res <- pblapply(1L:5, function(fold) {
     model_cv <- hsmm(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], aaaggregation)
     test_dat <- c(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] != fold]],
                   cv_neg[pos_ids[[4]][,][pos_ids[[5]] != fold]])
-    lapply(1L:length(test_dat), function(protein_id) try({
+    parLapply(cl, 1L:length(test_dat), function(protein_id) try({
+      library(signal.hsmm)
       predict.signal.hsmm(model_cv, test_dat[[protein_id]])
     }, silent = TRUE))
   })
-  
   lapply(fold_res, function(fold)
     sapply(fold, function(i)
       if(class(i) != "try-error") {
@@ -48,4 +50,6 @@ multifolds <- pblapply(1L:2, function(dummy_variable) {
       }))
 })
 
-save(multifolds, file = "crossval.RData")
+stopCluster(cl)
+
+save(multifolds_cl, file = "crossval_part.RData")
