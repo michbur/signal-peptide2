@@ -25,7 +25,7 @@ save(jack_pos, jack_neg, file = "jackknife.RData")
 #cross-validation --------------------------------
 #proteins with signal peptides
 
-multifolds <- pblapply(1L:1000, function(dummy_variable) {
+multifolds <- pblapply(1L:2, function(dummy_variable) {
   
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs_pure[sample(1L:length(neg_seqs_pure), length(pos_seqs))]
@@ -34,7 +34,7 @@ multifolds <- pblapply(1L:1000, function(dummy_variable) {
     model_cv <- hsmm(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], aaaggregation)
     test_dat <- c(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] != fold]],
                   cv_neg[pos_ids[[4]][,][pos_ids[[5]] != fold]])
-    pblapply(1L:length(test_dat), function(protein_id) try({
+    lapply(1L:length(test_dat), function(protein_id) try({
       predict.signal.hsmm(model_cv, test_dat[[protein_id]])
     }, silent = TRUE))
   })
