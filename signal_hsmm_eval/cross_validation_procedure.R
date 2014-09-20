@@ -53,3 +53,24 @@ multifolds_cl <- lapply(1L:50, function(dummy_variable) {
 stopCluster(cl)
 
 save(multifolds_cl, file = "crossval_part.RData")
+
+
+
+pos_ids <- cvFolds(length(pos_seqs), K = 5)
+true_labels <- lapply(1L:5, function(fold) 
+  c(rep(1, sum(pos_ids[[5]] != fold)),
+    rep(0, sum(pos_ids[[5]] != fold))))
+
+cv_res <- do.call(rbind, pblapply(multifolds_cl, function(random_split) 
+  do.call(rbind, lapply(1L:5, function(fold) {
+    single_pred <- random_split[[fold]]
+    NAs <- is.na(single_pred)
+    res <- HMeasure(true_labels[[fold]][!NAs], single_pred[!NAs])[["metrics"]]
+    TP <- as.numeric(res[["TP"]])
+    FP <- as.numeric(res[["FP"]])
+    TN <- as.numeric(res[["TN"]])
+    FN <- as.numeric(res[["FN"]])
+    cbind(res, MCC = (TP*TN - FP*FN)/sqrt((TP + FP)*(TP + FN)*(TN + FP)*(TN + FN)))
+  }))))
+
+save(cv_res, file = "crossval_full.RData")
