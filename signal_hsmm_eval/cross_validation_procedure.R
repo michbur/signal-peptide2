@@ -28,11 +28,11 @@ save(jack_pos, jack_neg, file = "jackknife.RData")
 cl <- makeCluster(4, type = "SOCK")
 clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision"))
 
-multifolds_cl <- lapply(1L:50, function(dummy_variable) { 
+multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs_pure[sample(1L:length(neg_seqs_pure), length(pos_seqs))]
   
-  fold_res <- pblapply(1L:5, function(fold) {
+  fold_res <- lapply(1L:5, function(fold) {
     model_cv <- hsmm(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], aaaggregation)
     test_dat <- c(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] != fold]],
                   cv_neg[pos_ids[[4]][,][pos_ids[[5]] != fold]])
@@ -52,4 +52,4 @@ multifolds_cl <- lapply(1L:50, function(dummy_variable) {
 
 stopCluster(cl)
 
-save(multifolds_cl, file = "crossval_part.RData")
+save(multifolds_cl_work, file = "crossval_part_work.RData")
