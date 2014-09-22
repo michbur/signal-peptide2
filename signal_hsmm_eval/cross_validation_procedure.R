@@ -28,11 +28,11 @@ save(jack_pos, jack_neg, file = "jackknife.RData")
 cl <- makeCluster(4, type = "SOCK")
 clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision"))
 
-multifolds_cl <- lapply(1L:50, function(dummy_variable) { 
+multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs_pure[sample(1L:length(neg_seqs_pure), length(pos_seqs))]
   
-  fold_res <- pblapply(1L:5, function(fold) {
+  fold_res <- lapply(1L:5, function(fold) {
     model_cv <- hsmm(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], aaaggregation)
     test_dat <- c(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] != fold]],
                   cv_neg[pos_ids[[4]][,][pos_ids[[5]] != fold]])
@@ -52,6 +52,7 @@ multifolds_cl <- lapply(1L:50, function(dummy_variable) {
 
 stopCluster(cl)
 
+save(multifolds_cl_work, file = "crossval_part_work.RData")
 save(multifolds_cl, file = "crossval_part.RData")
 
 
@@ -61,16 +62,18 @@ true_labels <- lapply(1L:5, function(fold)
   c(rep(1, sum(pos_ids[[5]] != fold)),
     rep(0, sum(pos_ids[[5]] != fold))))
 
-cv_res <- do.call(rbind, pblapply(multifolds_cl, function(random_split) 
-  do.call(rbind, lapply(1L:5, function(fold) {
-    single_pred <- random_split[[fold]]
-    NAs <- is.na(single_pred)
-    res <- HMeasure(true_labels[[fold]][!NAs], single_pred[!NAs])[["metrics"]]
-    TP <- as.numeric(res[["TP"]])
-    FP <- as.numeric(res[["FP"]])
-    TN <- as.numeric(res[["TN"]])
-    FN <- as.numeric(res[["FN"]])
-    cbind(res, MCC = (TP*TN - FP*FN)/sqrt((TP + FP)*(TP + FN)*(TN + FP)*(TN + FN)))
-  }))))
+cv_res <- do.call(rbind, pblapply(c(multifolds_cl, multifolds_cl_work), 
+                                  function(random_split) 
+                                    do.call(rbind, lapply(1L:5, function(fold) {
+                                      single_pred <- random_split[[fold]]
+                                      NAs <- is.na(single_pred)
+                                      res <- HMeasure(true_labels[[fold]][!NAs], single_pred[!NAs])[["metrics"]]
+                                      TP <- as.numeric(res[["TP"]])
+                                      FP <- as.numeric(res[["FP"]])
+                                      TN <- as.numeric(res[["TN"]])
+                                      FN <- as.numeric(res[["FN"]])
+                                      cbind(res, MCC = (TP*TN - FP*FN)/sqrt((TP + FP)*(TP + FN)*(TN + FP)*(TN + FN)))
+                                    }))))
 
 save(cv_res, file = "crossval_full.RData")
+
