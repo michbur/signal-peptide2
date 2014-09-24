@@ -1,0 +1,261 @@
+\documentclass[10pt]{beamer}
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage[notocbib]{apacite}
+
+
+% rysunki
+\usepackage{tikz}
+\usepackage{ifthen}
+\usepackage{xxcolor}
+\usetikzlibrary{arrows}
+\usetikzlibrary[topaths]
+\usetikzlibrary{decorations.pathreplacing}
+
+
+\setbeamertemplate{caption}{\centering\insertcaption\par}
+\setlength{\belowcaptionskip}{15pt}
+\renewcommand{\thetable}{}
+
+\begin{document}
+
+
+<<knitrIntro, echo = FALSE, message=FALSE>>=
+library(xtable)
+library(ggplot2)
+library(reshape2)
+source("start.R")
+load(paste0(pathway, "crossval_full.RData"))
+@
+
+
+\date{}
+\author{Michał  Burdukiewicz\inst{1}, Piotr Sobczyk\inst{2}, Paweł  Błażej\inst{1}, \\ Paweł Mackiewicz\inst{1}}
+\institute{\inst{1} University of Wrocław, Department of Genomics, Poland \and %
+\inst{2} Wrocław University of Technology, Institute of Mathematics and Computer Science, Poland}
+
+\title{Signal peptide prediction using hidden Markov models}
+
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+\frametitle{Outline}
+\tableofcontents
+\end{frame}
+
+
+\AtBeginSection[]
+{
+\begin{frame}<beamer>
+\frametitle{Outline}
+\tableofcontents[currentsection]
+\end{frame}
+}
+
+
+
+
+\section{Secretory signal peptides}
+
+\begin{frame}
+Secretory signal peptides:
+\begin{itemize}
+\item are short (20-30 residues) N-terminal amino acid sequences,
+\item direct a protein to the endomembrane system and next to the extracellular localization,
+\item possess three distinct domains with variable length and specific amino acid composition~\cite{hegde_surprising_2006}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+Proteins with secretory signal peptides fulfil important functions. They are:
+\begin{itemize}
+\item hormons (e.g., prolactin, glucagon),
+\item immune system proteins (e.g., interferons, interleukins),
+\item structural proteins (e.g., collagen),
+\item metabolic enzymes (e.g., alpha-galactosidase, pepsins).
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht]
+\caption{\large{Organization of signal peptide}}
+\centering
+\scalebox{0.4}{
+\includegraphics{SP.png}
+}
+\end{figure}
+
+\begin{itemize}
+\item n-region: mostly basic residues~\cite{nielsen_prediction_1998},
+\item h-region: strongly hydrophobic~\cite{nielsen_prediction_1998},
+\item c-region: a few polar, uncharged residues~\cite{jain_signal_1994}.
+\end{itemize}
+\end{frame}
+
+
+\section{Hidden semi-Markov model}
+
+\begin{frame}
+Hidden semi-Markov model (HSMM) of a secretory signal peptide assumes that:
+\begin{itemize}
+\item<1-> the observable distribution of amino acids is a result of being in a certain region (state),
+\item<2-> a duration of the state (the length of given region) is modeled by a probability distribution (other than geometric distribution as in typical hidden Markov models).
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+Training procedure:
+\begin{itemize}
+\item<1-> removal of atypical or poorly annotated records from data set of proteins with signal peptide from UniProt database,
+\item<2-> determination of n-, h-, c-regions by the heuristic algorithm, 
+\item<3-> reduction of dimensionality by aggregating amino acids to several physicochemical groups,
+\item<4-> calculation of the amino acid group frequency in each region and the average length of the region,
+\item<5-> training of two HSMM models for proteins with and without signal peptide.
+\end{itemize} 
+\end{frame}
+
+\begin{frame}
+<<echo = FALSE,message=FALSE,results='asis'>>=
+tabAminokwasow = function(aminokwasy, nazwyGrupy, ...) {
+  tab = cbind(data.frame(1:length(aminokwasy)), data.frame(sapply(aminokwasy, function(x) paste(x, collapse=", "))))
+  dimnames(tab) = list(nazwyGrupy, c("Group", "Amino acids"))
+  return(xtable(tab, align = c("r", "c", "l"), ...))
+}
+
+aa5 = list('1' = c("K", "R", "H"),
+           '2' = c("V","I","L","M","F","W","C"),
+           '3' = c("S", "T", "N", "Q"),
+           '4' = c("D","E","A","P","Y","G"))
+print(tabAminokwasow(aa5, c("Positively charged", "Nonpolar and aliphatic",
+                            "Polar and uncharged", "Negatively charged and nonpolar"),
+                     caption = "Classification of amino acids used by our algorithm called signal.hsmm."),
+      caption.placement = "top")
+@
+\end{frame}
+
+
+\begin{frame}
+During the test phase, each protein was fitted to two HSMMs. The outcome consists of   probabilities that a particular residue belongs to a given model and predicted cleavage site.
+\end{frame}
+
+\begin{frame}
+\begin{figure}[ht]
+\caption{\large{signal.hsmm predictive model}}
+\centering
+\scalebox{0.4}{
+\includegraphics{HSMMs.png}
+}
+\end{figure}
+
+
+\end{frame}
+
+\section{signal.hsmm evaluation}
+
+\begin{frame}
+A validated data set contains 3816 eukaryotic proteins with experimentally confirmed signal peptides and 9795 eukaryotic proteins without signal peptides.
+\\[12pt]
+Proteins with more than one cleavage site were removed from the data set.
+\end{frame}
+
+\begin{frame}
+Validation procedure:
+\begin{enumerate}
+\item<1-> Chose randomly (without replacement) 1200 proteins with signal peptides and train signal.hsmm.
+\item<2-> Chose randomly (without replacement) 120 proteins with signal peptides and 120 proteins without signal peptide and test it with a newly trained signal.hsmm. Calculate performance measures.
+\item<3-> Repeat step 1. and 2. 1000 times.
+\end{enumerate} 
+\end{frame}
+
+\begin{frame}
+\begin{figure}
+    \scalebox{0.95}{    
+<<echo = FALSE,message=FALSE,fig.width=10,fig.align='center'>>=
+melt_1000 <- melt(thousand_reps_measur[, c("AUC", "H", "MCC", "Sens", "Spec", "Precision", "Recall", "TPR")])
+levels(melt_1000[[1]]) <- c("AUC", "H-measure", "MCC", "Sensitivity", "Specificity", "Precision", "Recall", "TPR")
+ggplot(melt_1000, aes(x = variable, y = value)) + geom_boxplot() +
+  scale_x_discrete(name = "Performance measure") + scale_y_continuous(name = "Value") +
+  theme(plot.background=element_rect(fill = "transparent",colour = "transparent"),
+        axis.text.x = element_text(size=16), axis.text.y = element_text(size=16),
+        axis.title.x = element_text(size=19), axis.title.y = element_text(size=19))
+@
+    }
+\end{figure}
+\end{frame}
+
+
+
+
+\section{Comparision with other signal peptide predictors}
+
+\begin{frame}
+\begin{overlayarea}{\textwidth}{.6\textheight}
+Other secretory signal peptide predictors:
+\begin{itemize}
+\item<1-> neural networks (SignalP 4.1)~\shortcite
+
+
+{petersen_signalp_2011},
+\item<2-> hidden Markov models (Phobius)~\cite{kall_combined_2004, bagos_combined_2010,
+reynolds_transmembrane_2008},
+\item<3-> position matrices (PredSi)~\cite{hiller_predisi:_2004}.
+\end{itemize} 
+\end{overlayarea}
+\end{frame}
+
+\begin{frame}
+
+\\[12pt]
+signal.hsmm1987 was trained on data set of 496 eukaryotic proteins with signal peptides added before year 1987.
+\\[12pt]
+signal.hsmm2010 was trained on data set of 3676 eukaryotic proteins with signal peptides added before year 2010.
+\\[12pt]
+Final data set chosen for comparison contain 120 eukaryotic proteins with experimentally confirmed signal peptides and 280 eukaryotic proteins without signal peptides added after 2012.
+\end{frame}
+
+\begin{frame}
+ 
+<<echo = FALSE,message=FALSE,results='asis'>>=
+citations <- c("~\\shortcite{petersen_signalp_2011}",
+  "~\\shortcite{petersen_signalp_2011}",
+  "~\\shortcite{DyrlovBendtsen2004783}",
+  "~\\shortcite{DyrlovBendtsen2004783}",
+  "~\\shortcite{hiller_predisi:_2004}",
+  "~\\shortcite{kall_combined_2004}",
+  "~\\shortcite{bagos_combined_2010}",
+  "~\\shortcite{reynolds_transmembrane_2008}")
+comp_tab <- measures[c(1L:length(citations), 9, 13), c("AUC", "H", "MCC")]
+nice_tab <- comp_tab
+rownames(nice_tab)[1L:length(citations)] <- paste0(rownames(nice_tab)[1L:length(citations)],
+                                                   citations)
+print(xtable(nice_tab[-(3:4), ], align = "rccc",
+      caption = "AUC - Area Under the Curve. H - H-measure. MCC - Matthew's Correlation Coefficient."), sanitize.rownames.function = function(x) x)
+@
+
+\end{frame}
+
+
+\section{Summary}
+
+\begin{frame}
+Hidden semi-Markov models can be used to accurately predict the presence of secretory signal peptides effectively extracting information from very small data sets.
+\end{frame}
+
+\begin{frame}
+signal.hsmm web server: \url{http://michbur.shinyapps.io/signalhsmm/}
+\\[12pt]
+signal.hsmm R package: \url{http://cran.r-project.org/web/packages/signal.hsmm/}
+\end{frame}
+
+\begin{frame}[allowframebreaks]
+\bibliographystyle{apacite}
+\bibliography{document}
+\end{frame}
+
+\end{document}
