@@ -143,7 +143,7 @@ Cleavage site: characterized by very variable amino acid composition, typically 
 \section{Hidden semi-Markov model}
 
 \begin{frame}
-Hidden semi-Markov models assumptions:
+Hidden semi-Markov models assumptions~\cite{rabiner}:
 \begin{itemize}
 \item<1-> the current region (state) of the sequence (process) depends on the previous region,
 \item<2-> regions may be only indirectly determined using amino acid residues (observations),
@@ -182,11 +182,6 @@ print(xtable(dat, caption = "Classification of amino acids used by signal.hsmm."
 @
 \end{frame}
 
-
-\begin{frame}
-During the test phase, each protein was fitted to two models. The outcome consists of   probabilities that a particular residue belongs to a given model and predicted cleavage site.
-\end{frame}
-
 \begin{frame}
 \begin{figure}[ht]
 \caption{\large{signal.hsmm predictive model}}
@@ -195,6 +190,8 @@ During the test phase, each protein was fitted to two models. The outcome consis
 \includegraphics{HSMMs.png}
 }
 \end{figure}
+
+During the test phase, each protein was fitted to two models. The outcome consists of   probabilities that a particular residue belongs to a given model and predicted cleavage site.
 
 
 \end{frame}
@@ -210,10 +207,10 @@ Proteins with more than one cleavage site were removed from the data set.
 \begin{frame}
 Validation procedure:
 \begin{enumerate}
-\item<1-> Split 3897 positive proteins with signal peptides in 5 groups.
-\item<2-> Chose randomly (without replacement) 3897 proteins without signal peptides and split them in 5 groups.
+\item<1-> Shuffle and split 3897 positive proteins with signal peptides in 5 groups.
+\item<2-> Choose randomly (without replacement) 3897 proteins without signal peptides and split them in 5 groups.
 \item<3-> Perform 5-fold cross-validation.
-\item<4-> Repeat steps 1-3 150 times (to assure that each sequence from negative data set was chosen at least once).
+\item<4-> Repeat steps 1-3 150 times (to assure with probability 0.95 that each sequence from negative data set was chosen at least once).
 \end{enumerate} 
 \end{frame}
 
