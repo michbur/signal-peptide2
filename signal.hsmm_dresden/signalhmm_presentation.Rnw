@@ -147,7 +147,7 @@ Hidden semi-Markov models assumptions~\cite{rabiner}:
 \begin{itemize}
 \item<1-> the current region (state) of the sequence (process) depends on the previous region,
 \item<2-> regions may be only indirectly determined using amino acid residues (observations),
-\item<3-> probability of staying in a region depends on its length.
+\item<3-> probability of staying in a region is modeled by a probability distribution.
 \end{itemize}
 \end{frame}
 
@@ -210,7 +210,7 @@ Validation procedure:
 \item<1-> Shuffle and split 3897 positive proteins with signal peptides in 5 groups.
 \item<2-> Choose randomly (without replacement) 3897 proteins without signal peptides and split them in 5 groups.
 \item<3-> Perform 5-fold cross-validation.
-\item<4-> Repeat steps 1-3 150 times (to assure with probability 0.95 that each sequence from negative data set was chosen at least once).
+\item<4-> Repeat steps 1-3 150 times (to assure with probability 0.95 for each sequence from negative data set that she was chosen at least once).
 \end{enumerate} 
 \end{frame}
 
