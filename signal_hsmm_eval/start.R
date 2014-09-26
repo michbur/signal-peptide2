@@ -9,7 +9,7 @@ library(snow)
 # working directory ------------------------------
 
 if(Sys.info()["nodename"] == "MICHALKOMP" )
-  setwd("C:/Users/Michal/Dropbox/signal-peptide2_data")
+  pathway <- "C:/Users/Michal/Dropbox/signal-peptide2_data/"
 
 # SIGNAL-HSMM ------------------------------------
 

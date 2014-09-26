@@ -1,5 +1,5 @@
-pos_seqs <- read_uniprot("sept_signal.txt", euk = TRUE)
-neg_seqs <- read.fasta("sept_neg.fasta", seqtype = "AA")
+pos_seqs <- read_uniprot(paste0(pathway, "sept_signal.txt"), euk = TRUE)
+neg_seqs <- read.fasta(paste0(pathway, "sept_neg.fasta"), seqtype = "AA")
 #remove sequences with atypical aminoacids
 atyp_aa <- which(sapply(neg_seqs, function(i) any(i %in% c("X", "J", "Z", "B"))))
 too_short <- which(sapply(neg_seqs, length) < 50)
