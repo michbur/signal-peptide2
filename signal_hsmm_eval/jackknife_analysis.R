@@ -39,8 +39,14 @@ jack_res2 <- rbind(jack_res2,
                    MCC = (TP*TN - FP*FN)/sqrt((TP + FP)*(TP + FN)*(TN + FP)*(TN + FN)))
 write.table(jack_res2, file = "jackknife_table2.txt", sep = "\t")
 
-TP <- 100
-FP <- 1
-TN <- 100
-FN <- 1
-(TP*TN - FP*FN)/sqrt((TP + FP)*(TP + FN)*(TN + FP)*(TN + FN))
+
+
+problematic_seqs <- neg_seqs_pure[which(sapply(jack_neg, class) == "try-error")]
+
+no_selenocystein <- lapply(problematic_seqs, function(i) {
+  aas <- unique(i)
+  aas[!(aas %in% a()[-1])]
+})
+
+problematic_seqs[which(no_selenocystein)]
+
