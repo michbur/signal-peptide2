@@ -35,7 +35,7 @@ multifolds <- pblapply(1L:150, function(dummy_variable) {
     as.matrix(count_ngrams(cv_neg[[i]][1L:sig_length], 2, a()[-1]))/sig_length
   }))
   
-  fold_res <- lapply(1L:5, function(fold) {
+  fold_res <- lapply(1L:5, function(fold) try({
     
     train_data <- data.frame(cbind(data.frame(rbind(pos_freqs[pos_ids[[5]] == fold, ],
                                                     neg_freqs[pos_ids[[5]] == fold, ])),
@@ -63,7 +63,7 @@ multifolds <- pblapply(1L:150, function(dummy_variable) {
                SVMrbf_pos = SVMrbf_pos,
                NB_pos = NB_pos,
                RF_pos = RF_pos)
-  })
+  }, silent = TRUE))
 })
 
 save(multifolds, paste0(pathway, "freq_analysis.RData"))
