@@ -143,7 +143,7 @@ Cleavage site: characterized by very variable amino acid composition, typically 
 \section{Hidden semi-Markov model}
 
 \begin{frame}
-Hidden semi-Markov models assumptions~\cite{rabiner}:
+Hidden semi-Markov models assumptions~\cite{rabiner, koski2001hidden}:
 \begin{itemize}
 \item<1-> the current region (state) of the sequence (process) depends on the previous region,
 \item<2-> regions may be only indirectly determined using amino acid residues (observations),
