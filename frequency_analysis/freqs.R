@@ -68,4 +68,5 @@ multifolds <- pblapply(1L:150, function(dummy_variable) {
 
 save(multifolds, paste0(pathway, "freq_analysis.RData"))
 
-
+#1   2   3   4   5 
+#780 780 779 779 779
