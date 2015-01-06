@@ -39,7 +39,9 @@ cleave_train_ets <- cleave_train_ets[-na_cases]
 
 cleave_train_grams <- cbind(count_ngrams(cleave_train, 1, 1L:4, pos = TRUE),
                             count_ngrams(cleave_train, 2, 1L:4, pos = TRUE))
-test_features(cleave_train_ets, cleave_train_grams)
+all_tested <- test_features(cleave_train_ets, cleave_train_grams)
+
+imp_features <- aggregate(all_tested, c(0, 1e-03, 1))[[1]]
 
 # #cross-validation --------------------------------
 # #proteins with signal peptides
