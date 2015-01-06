@@ -5,14 +5,33 @@ atyp_aa <- which(sapply(neg_seqs, function(i) any(i %in% c("X", "J", "Z", "B", "
 too_short <- which(sapply(neg_seqs, length) < 50)
 neg_seqs <- neg_seqs[-unique(c(atyp_aa, too_short))]
 
-
-
+too_short <- which(sapply(pos_seqs, length) < 50)
+pos_seqs <- pos_seqs[-c(too_short)]
 
 pos_ids <- cvFolds(length(pos_seqs), K = 5)
 neg_ids <- cvFolds(length(neg_seqs), K = 5)
 
-i = 1
-train_dat <- pos_ids[["which"]] == i
+k_fold = 1
+cleave_train <- do.call(rbind, lapply(pos_seqs[pos_ids[["which"]] == k_fold], function(seq) {
+  cleave_site <- attr(seq, "sig")[2]
+  cs <- seq[(cleave_site-4):(cleave_site+3)]
+  pre_cs <- if(cleave_site > 12) {
+    seq[(cleave_site - 12):(cleave_site - 5)]
+  } else {
+    rep(NA, 8)
+  }
+  post_cs <- seq[(cleave_site + 6):(cleave_site + 13)]
+  matrix(c(cs, pre_cs, post_cs), nrow = 3, byrow = TRUE)
+}))
+
+degenerate(cleave_train, aaaggregation)
+
+t(apply(cleave_train, 1, function(i)
+  if(!all(is.na(i))) {
+    degenerate(i, aaaggregation)
+  } else {
+    i
+  }))
 
 
 # #cross-validation --------------------------------
