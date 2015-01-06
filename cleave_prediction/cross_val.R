@@ -24,15 +24,22 @@ cleave_train <- do.call(rbind, lapply(pos_seqs[pos_ids[["which"]] == k_fold], fu
   matrix(c(cs, pre_cs, post_cs), nrow = 3, byrow = TRUE)
 }))
 
-degenerate(cleave_train, aaaggregation)
-
-t(apply(cleave_train, 1, function(i)
-  if(!all(is.na(i))) {
-    degenerate(i, aaaggregation)
-  } else {
+cleave_train <- t(apply(cleave_train, 1, function(i)
+  if(all(is.na(i))) {
     i
+  } else {
+    degenerate(i, aaaggregation)
   }))
 
+cleave_train_ets <- rep(c(1, 0, 0), nrow(cleave_train)/3)
+
+na_cases <- which(is.na(cleave_train[, 1]))
+cleave_train <- cleave_train[-na_cases, ]
+cleave_train_ets <- cleave_train_ets[-na_cases]
+
+cleave_train_grams <- cbind(count_ngrams(cleave_train, 1, 1L:4, pos = TRUE),
+                            count_ngrams(cleave_train, 2, 1L:4, pos = TRUE))
+test_features(cleave_train_ets, cleave_train_grams)
 
 # #cross-validation --------------------------------
 # #proteins with signal peptides
