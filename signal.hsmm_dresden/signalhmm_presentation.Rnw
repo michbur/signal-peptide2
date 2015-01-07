@@ -253,7 +253,7 @@ signal.hsmm1987 was trained on data set of 496 eukaryotic proteins with signal p
 \\[12pt]
 signal.hsmm2010 was trained on data set of 3676 eukaryotic proteins with signal peptides added before year 2010.
 \\[12pt]
-Final data set chosen for comparison contain 120 eukaryotic proteins with experimentally confirmed signal peptides and 280 eukaryotic proteins without signal peptides added after 2012.
+Final data set chosen for comparison contain 140 eukaryotic proteins with experimentally confirmed signal peptides and 280 eukaryotic proteins without signal peptides added after 2012.
 \end{frame}
 
 \begin{frame}

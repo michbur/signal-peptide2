@@ -12,60 +12,67 @@ library(tree)
 library(randomForest)
 library(kernlab)
 library(e1071)
-library(MASS)
+library(klaR)
 library(pbapply)
 library(cvTools)
+library(nnet)
+library(party)
+library(ipred)
 #here start loop
 #shuffle pos
 
-
-
-pos_freqs <- t(pbsapply(pos_seqs, function(i) {
-  sig_length <- attr(i, "sig")[2]
-  as.matrix(count_ngrams(i[1L:sig_length], 2, a()[-1]))/sig_length
-}))
-
-
-multifolds <- pblapply(1L:150, function(dummy_variable) { 
-  pos_ids <- cvFolds(nrow(pos_freqs), K = 5)
+multifolds <- lapply(1L:2, function(n_gram) {
   
-  cv_neg <- neg_seqs_pure[sample(1L:length(neg_seqs_pure), nrow(pos_freqs))]
-  neg_freqs <- t(sapply(1L:nrow(pos_freqs), function(i) {
-    sig_length <- attr(pos_seqs[[i]], "sig")[2]
-    as.matrix(count_ngrams(cv_neg[[i]][1L:sig_length], 2, a()[-1]))/sig_length
+  pos_freqs <- t(pbsapply(pos_seqs, function(i) {
+    sig_length <- attr(i, "sig")[2]
+    as.matrix(count_ngrams(i[1L:sig_length], n_gram, a()[-1]))/sig_length
   }))
   
-  fold_res <- lapply(1L:5, function(fold) try({
+  pblapply(1L:150, function(dummy_variable) { 
+    pos_ids <- cvFolds(nrow(pos_freqs), K = 5)
     
-    train_data <- data.frame(cbind(data.frame(rbind(pos_freqs[pos_ids[[5]] == fold, ],
-                                                    neg_freqs[pos_ids[[5]] == fold, ])),
-                                   target = c(rep("pos", sum(pos_ids[[5]] == fold)), 
-                                              rep("neg", sum(pos_ids[[5]] == fold)))))
+    cv_neg <- neg_seqs_pure[sample(1L:length(neg_seqs_pure), nrow(pos_freqs))]
+    neg_freqs <- t(sapply(1L:nrow(pos_freqs), function(i) {
+      sig_length <- attr(pos_seqs[[i]], "sig")[2]
+      as.matrix(count_ngrams(cv_neg[[i]][1L:sig_length], n_gram, a()[-1]))/sig_length
+    }))
     
-    test_data <- data.frame(cbind(data.frame(rbind(pos_freqs[pos_ids[[5]] != fold, ],
-                                                   neg_freqs[pos_ids[[5]] != fold, ])),
-                                  target = c(rep("pos", sum(pos_ids[[5]] != fold)), 
-                                             rep("neg", sum(pos_ids[[5]] != fold)))))
+    fold_res <- lapply(1L:5, function(fold) try({
+      train_data <- data.frame(cbind(data.frame(rbind(pos_freqs[pos_ids[[5]] == fold, ],
+                                                      neg_freqs[pos_ids[[5]] == fold, ])),
+                                     target = c(rep("pos", sum(pos_ids[[5]] == fold)), 
+                                                rep("neg", sum(pos_ids[[5]] == fold)))))
       
-    modelRF <- randomForest(target ~ ., data = train_data)
-    modelSVMlin <- ksvm(target ~ ., data = train_data, prob.model = TRUE,
-                        kernel = "vanilladot")
-    modelSVMrbf <- ksvm(target ~ ., data = train_data, prob.model = TRUE,
-                        kernel = "rbfdot")
-    modelNB <- naiveBayes(target ~ ., data = train_data)
-
-    RF_pos <- predict(modelRF, test_data, type = "prob")[, 2]
-    SVMlin_pos <- predict(modelSVMlin, test_data, type = "prob")[, 2]
-    SVMrbf_pos <- predict(modelSVMrbf, test_data, type = "prob")[, 2]
-    NB_pos <- predict(modelNB, test_data, type = "raw")[, 2]
-
-    data.frame(SVMlin_pos = SVMlin_pos,
-               SVMrbf_pos = SVMrbf_pos,
-               NB_pos = NB_pos,
-               RF_pos = RF_pos)
-  }, silent = TRUE))
+      test_data <- data.frame(cbind(data.frame(rbind(pos_freqs[pos_ids[[5]] != fold, ],
+                                                     neg_freqs[pos_ids[[5]] != fold, ])),
+                                    target = c(rep("pos", sum(pos_ids[[5]] != fold)), 
+                                               rep("neg", sum(pos_ids[[5]] != fold)))))
+      
+      modelRF <- randomForest(target ~ ., data = train_data)
+      modelSVMlin <- ksvm(target ~ ., data = train_data, prob.model = TRUE,
+                          kernel = "vanilladot")
+      modelSVMrbf <- ksvm(target ~ ., data = train_data, prob.model = TRUE,
+                          kernel = "rbfdot")
+      modelNB <- naiveBayes(target ~ ., data = train_data)
+      modelNN <- nnet(target ~ ., data = train_data, size=10, MaxNWts = 2e6)
+      modelKNN <-ipredknn(target ~ ., data = train_data)
+      
+      RF_pos <- predict(modelRF, test_data, type = "prob")[, 2]
+      SVMlin_pos <- predict(modelSVMlin, test_data, type = "prob")[, 2]
+      SVMrbf_pos <- predict(modelSVMrbf, test_data, type = "prob")[, 2]
+      NB_pos <- predict(modelNB, test_data, type = "raw")[, 2]
+      NN_pos <- predict(modelNN, test_data, type="raw")
+      KNN_pos <- predict(modelKNN, test_data)
+      
+      data.frame(SVMlin_pos = SVMlin_pos,
+                 SVMrbf_pos = SVMrbf_pos,
+                 NB_pos = NB_pos,
+                 RF_pos = RF_pos,
+                 NN_pos = NN_pos,
+                 KNN_pos = KNN_pos)
+    }, silent = TRUE))
+  })
 })
-
-save(multifolds, paste0(pathway, "freq_analysis.RData"))
+save(multifolds, file = paste0(pathway, "freq_analysis.RData"))
 
 
