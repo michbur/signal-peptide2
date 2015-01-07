@@ -75,4 +75,5 @@ multifolds <- lapply(1L:2, function(n_gram) {
 })
 save(multifolds, file = paste0(pathway, "freq_analysis.RData"))
 
-
+#1   2   3   4   5 
+#780 780 779 779 779

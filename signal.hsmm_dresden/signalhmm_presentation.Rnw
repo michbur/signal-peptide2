@@ -143,7 +143,7 @@ Cleavage site: characterized by very variable amino acid composition, typically 
 \section{Hidden semi-Markov model}
 
 \begin{frame}
-Hidden semi-Markov models assumptions~\cite{rabiner}:
+Hidden semi-Markov models assumptions~\cite{rabiner, koski2001hidden}:
 \begin{itemize}
 \item<1-> the current region (state) of the sequence (process) depends on the previous region,
 \item<2-> regions may be only indirectly determined using amino acid residues (observations),
@@ -278,11 +278,8 @@ print(xtable(nice_tab[-c(3:4, 7), ], align = "rccc",
 \end{frame}
 
 
-\section{Summary}
+\section{Availability}
 
-\begin{frame}
-Hidden semi-Markov models can be used to accurately predict the presence of secretory signal peptides effectively extracting information from very small data sets.
-\end{frame}
 
 \begin{frame}
 signal.hsmm web server: \url{http://michbur.shinyapps.io/signalhsmm/}
@@ -290,9 +287,29 @@ signal.hsmm web server: \url{http://michbur.shinyapps.io/signalhsmm/}
 signal.hsmm R package: \url{http://cran.r-project.org/web/packages/signal.hsmm/}
 \end{frame}
 
+
+
+\begin{frame}
+<<echo = FALSE,message=FALSE,fig.width=10,fig.align='center'>>=
+library(signal.hsmm)
+pred <- run_signal.hsmm(benchmark_dat[[1]])[[1]]
+plot(pred)
+@
+\end{frame}
+
+
+
+
+\section{Summary}
+
+\begin{frame}
+Hidden semi-Markov models can be used to accurately predict the presence of secretory signal peptides effectively extracting information from very small data sets.
+\end{frame}
+
+
 \begin{frame}[allowframebreaks]
 \bibliographystyle{apacite}
-\bibliography{document}
+\bibliography{C:/Users/Michal/Documents/GitHub/signal-peptide2/signal.hsmm_dresden/document.bib}
 \end{frame}
 
 \end{document}
