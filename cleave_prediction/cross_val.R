@@ -27,7 +27,7 @@ multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) {
     model_cv <- hsmm(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], aaaggregation)
     test_dat <- c(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] != fold]],
                   cv_neg[pos_ids[[4]][,][pos_ids[[5]] != fold]])
-    #parLapply(cl, 1L:length(test_dat), function(protein_id) try({
+    parLapply(cl, 1L:length(test_dat), function(protein_id) try({
     #cleavege site prediction - extract cleave data
     cleave_train <- do.call(rbind, lapply(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], function(seq) {
       cleave_site <- attr(seq, "sig")[2]
@@ -67,7 +67,7 @@ multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) {
     #train RF
     rf_model <- randomForest(tar ~ ., data = rf_train)
     
-
+    
     hsmm_preds <- lapply(1L:length(test_dat), function(protein_id) try({
       #hsmm_preds <- lapply(1L:10, function(protein_id) try({
       library(signal.hsmm)
@@ -79,24 +79,26 @@ multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) {
       c(if(class(hsmm_preds[[protein_id]]) == "try-error") {
         c(NA, NA, NA)
       } else {
-        c(hsmm_preds[[protein_id]], rf_end = {
-            hsmm_end <- hsmm_preds[[protein_id]][["sp_end"]]
-            pred_start <- ifelse(hsmm_end > 9, hsmm_end - 9, 2)
-            deg_subseq <- degenerate(test_dat[[protein_id]][(pred_start):(hsmm_end + 18)],
-                                     aaaggregation)
-
-            deg_subseqs <- t(sapply(1L:21, function(subseq_start) 
-              deg_subseq[subseq_start:(subseq_start + 7)]))
-            
-            cleave_test_grams <- cbind(count_ngrams(deg_subseqs, 1, 1L:4, pos = TRUE),
-                                       count_ngrams(deg_subseqs, 2, 1L:4, pos = TRUE))
-            hsmm_end - 9 + which.max(predict(rf_model,
-                    data.frame(as.matrix(cleave_test_grams[, imp_features])),
-                    type = "prob")[, 2])
-          }, real = ifelse(is.null(attr(test_dat[[protein_id]], "sig")[2]),
-                    NA, attr(test_dat[[protein_id]], "sig")[2]))
+        hsmm_end <- hsmm_preds[[protein_id]][["sp_end"]]
+        pred_start <- ifelse(hsmm_end > 9, hsmm_end - 9, 2)
+        deg_subseq <- degenerate(test_dat[[protein_id]][(pred_start):(hsmm_end + 18)],
+                                 aaaggregation)
+        
+        deg_subseqs <- t(sapply(1L:21, function(subseq_start) 
+          deg_subseq[subseq_start:(subseq_start + 7)]))
+        
+        cleave_test_grams <- cbind(count_ngrams(deg_subseqs, 1, 1L:4, pos = TRUE),
+                                   count_ngrams(deg_subseqs, 2, 1L:4, pos = TRUE))
+        rf_end <- hsmm_end - 9 + which.max(predict(rf_model,
+                                                   data.frame(as.matrix(cleave_test_grams[, imp_features])),
+                                                   type = "prob")[, 2])
+        
+        c(hsmm_preds[[protein_id]], rf_end = rf_end, real = ifelse(is.null(attr(test_dat[[protein_id]], "sig")[2]),
+                                                                   NA, attr(test_dat[[protein_id]], "sig")[2]))
       })))
   })
 })
 
 stopCluster(cl)
+
+save()
