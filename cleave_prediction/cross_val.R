@@ -19,7 +19,7 @@ neg_ids <- cvFolds(length(neg_seqs), K = 5)
 cl <- makeCluster(4, type = "SOCK")
 clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision"))
 
-multifolds_cl_work <- pblapply(1L:50, function(dummy_variable) { 
+multifolds_cl_work <- pblapply(1L:2, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs[sample(1L:length(neg_seqs), length(pos_seqs))]
   
@@ -28,7 +28,6 @@ multifolds_cl_work <- pblapply(1L:50, function(dummy_variable) {
     test_dat <- c(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] != fold]],
                   cv_neg[pos_ids[[4]][,][pos_ids[[5]] != fold]])
     
-    browser()
     #cleavege site prediction - extract cleave data
     cleave_train <- do.call(rbind, lapply(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], 
                                           function(seq) {
