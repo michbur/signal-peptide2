@@ -19,7 +19,7 @@ neg_ids <- cvFolds(length(neg_seqs), K = 5)
 cl <- makeCluster(4, type = "SOCK")
 clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision"))
 
-multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) { 
+multifolds_cl_work <- pblapply(1L:50, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs[sample(1L:length(neg_seqs), length(pos_seqs))]
   
@@ -27,9 +27,11 @@ multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) {
     model_cv <- hsmm(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], aaaggregation)
     test_dat <- c(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] != fold]],
                   cv_neg[pos_ids[[4]][,][pos_ids[[5]] != fold]])
-    parLapply(cl, 1L:length(test_dat), function(protein_id) try({
+    
+    browser()
     #cleavege site prediction - extract cleave data
-    cleave_train <- do.call(rbind, lapply(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], function(seq) {
+    cleave_train <- do.call(rbind, lapply(pos_seqs[pos_ids[[4]][,][pos_ids[[5]] == fold]], 
+                                          function(seq) {
       cleave_site <- attr(seq, "sig")[2]
       cs <- seq[(cleave_site-4):(cleave_site+3)]
       pre_cs <- if(cleave_site > 12) {
@@ -67,9 +69,9 @@ multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) {
     #train RF
     rf_model <- randomForest(tar ~ ., data = rf_train)
     
-    
-    hsmm_preds <- lapply(1L:length(test_dat), function(protein_id) try({
-      #hsmm_preds <- lapply(1L:10, function(protein_id) try({
+    hsmm_preds <- parLapply(cl, 1L:length(test_dat), function(protein_id) try({
+    #hsmm_preds <- lapply(1L:length(test_dat), function(protein_id) try({
+    #hsmm_preds <- parLapply(cl, 1L:50, function(protein_id) try({
       library(signal.hsmm)
       unlist(predict.signal.hsmm(model_cv, test_dat[[protein_id]])[[1]][c("sp_probability", "sp_end")])
     }, silent = TRUE))
@@ -99,6 +101,6 @@ multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) {
   })
 })
 
+
 stopCluster(cl)
 
-save()
