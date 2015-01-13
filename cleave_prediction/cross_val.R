@@ -5,6 +5,8 @@ atyp_aa <- which(sapply(neg_seqs, function(i) any(i %in% c("X", "J", "Z", "B", "
 too_short <- which(sapply(neg_seqs, length) < 50)
 neg_seqs <- neg_seqs[-unique(c(atyp_aa, too_short))]
 
+pblapply(neg_seqs, degenerate, aaaggregation)
+
 too_short <- which(sapply(pos_seqs, length) < 50)
 pos_seqs <- pos_seqs[-c(too_short)]
 
