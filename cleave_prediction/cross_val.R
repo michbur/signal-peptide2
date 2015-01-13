@@ -45,7 +45,7 @@ multifolds_cl_work <- pblapply(1L:40, function(dummy_variable) {
     }))
     #degenerate potential cleavage sites
     cleave_train <- t(apply(cleave_train, 1, function(i)
-      if(all(is.na(i))) {
+      if(any(is.na(i))) {
         i
       } else {
         degenerate(i, aaaggregation)
