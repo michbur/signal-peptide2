@@ -2,12 +2,10 @@ pos_seqs <- read_uniprot(paste0(pathway, "sept_signal.txt"), euk = TRUE)
 neg_seqs <- read.fasta(paste0(pathway, "sept_neg.fasta"), seqtype = "AA")
 #remove sequences with atypical aminoacids
 atyp_aa <- which(sapply(neg_seqs, function(i) any(i %in% c("X", "J", "Z", "B", "U"))))
-too_short <- which(sapply(neg_seqs, length) < 50)
+too_short <- which(sapply(neg_seqs, length) < 80)
 neg_seqs <- neg_seqs[-unique(c(atyp_aa, too_short))]
 
-pblapply(neg_seqs, degenerate, aaaggregation)
-
-too_short <- which(sapply(pos_seqs, length) < 50)
+too_short <- which(sapply(pos_seqs, length) < 80)
 pos_seqs <- pos_seqs[-c(too_short)]
 
 pos_ids <- cvFolds(length(pos_seqs), K = 5)
@@ -21,7 +19,7 @@ neg_ids <- cvFolds(length(neg_seqs), K = 5)
 #cl <- makeCluster(4, type = "SOCK")
 #clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision"))
 
-multifolds_cl_work <- pblapply(1L:40, function(dummy_variable) { 
+multifolds_cl_work <- pblapply(1L:4, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs[sample(1L:length(neg_seqs), length(pos_seqs))]
   
@@ -72,22 +70,21 @@ multifolds_cl_work <- pblapply(1L:40, function(dummy_variable) {
     
     #hsmm_preds <- parLapply(cl, c(1L:50, 4500:4550), function(protein_id) try({
     #clusterExport(cl, c("model_cv", "test_dat"), environment())
+    #hsmm_preds <- lapply(1L:length(test_dat), function(protein_id) try({
     hsmm_preds <- lapply(1L:length(test_dat), function(protein_id) try({
     #hsmm_preds <- parLapply(cl, 1L:50, function(protein_id) try({
       #library(signal.hsmm)
       unlist(predict.signal.hsmm(model_cv, test_dat[[protein_id]])[[1]][c("sp_probability", "sp_end")])
     }, silent = TRUE))
     
-    #lapply(1L:length(hsmm_preds), function(protein_id)
     t(sapply(1L:length(hsmm_preds), function(protein_id)
       c(if(class(hsmm_preds[[protein_id]]) == "try-error") {
         c(NA, NA, NA)
       } else {
         hsmm_end <- hsmm_preds[[protein_id]][["sp_end"]]
         pred_start <- ifelse(hsmm_end > 9, hsmm_end - 9, 2)
-        deg_subseq <- degenerate(test_dat[[protein_id]][(pred_start):(hsmm_end + 18)],
+        deg_subseq <- degenerate(test_dat[[protein_id]][(pred_start):(pred_start + 20)],
                                  aaaggregation)
-        
         deg_subseqs <- t(sapply(1L:21, function(subseq_start) 
           deg_subseq[subseq_start:(subseq_start + 7)]))
         
