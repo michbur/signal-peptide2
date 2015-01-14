@@ -5,8 +5,6 @@ atyp_aa <- which(sapply(neg_seqs, function(i) any(i %in% c("X", "J", "Z", "B", "
 too_short <- which(sapply(neg_seqs, length) < 80)
 neg_seqs <- neg_seqs[-unique(c(atyp_aa, too_short))]
 
-pblapply(neg_seqs, degenerate, aaaggregation)
-
 too_short <- which(sapply(pos_seqs, length) < 80)
 pos_seqs <- pos_seqs[-c(too_short)]
 
@@ -21,7 +19,7 @@ neg_ids <- cvFolds(length(neg_seqs), K = 5)
 #cl <- makeCluster(4, type = "SOCK")
 #clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision"))
 
-multifolds_cl_work <- pblapply(1L:40, function(dummy_variable) { 
+multifolds_cl_work <- pblapply(1L:4, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs[sample(1L:length(neg_seqs), length(pos_seqs))]
   
