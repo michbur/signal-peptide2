@@ -7,6 +7,7 @@ library(snow)
 library(biogram)
 library(signal.hsmm)
 library(randomForest)
+library(ggplot2)
 
 # working directory ------------------------------
 
