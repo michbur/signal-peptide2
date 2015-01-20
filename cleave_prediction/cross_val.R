@@ -102,5 +102,5 @@ multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) {
 
 stopCluster(cl)
 
-save(multifolds_cl_work, file = "cleave_pred100.RData")
+save(multifolds_cl_work, file = "cleave_pred20.RData")
 
