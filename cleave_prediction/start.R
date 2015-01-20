@@ -2,11 +2,12 @@ library(seqinr)
 library(hmeasure)
 library(pbapply)
 library(cvTools)
-#library(parallel)
-#library(snow)
+library(parallel)
+library(snow)
 library(biogram)
 library(signal.hsmm)
 library(randomForest)
+library(ggplot2)
 
 # working directory ------------------------------
 

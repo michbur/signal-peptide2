@@ -16,10 +16,10 @@ neg_ids <- cvFolds(length(neg_seqs), K = 5)
 #cross-validation --------------------------------
 #proteins with signal peptides
 
-#cl <- makeCluster(4, type = "SOCK")
-#clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision"))
+cl <- makeCluster(4, type = "SOCK")
+clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision", "degenerate"))
 
-multifolds_cl_work <- pblapply(1L:4, function(dummy_variable) { 
+multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs[sample(1L:length(neg_seqs), length(pos_seqs))]
   
@@ -71,9 +71,9 @@ multifolds_cl_work <- pblapply(1L:4, function(dummy_variable) {
     #hsmm_preds <- parLapply(cl, c(1L:50, 4500:4550), function(protein_id) try({
     #clusterExport(cl, c("model_cv", "test_dat"), environment())
     #hsmm_preds <- lapply(1L:length(test_dat), function(protein_id) try({
-    hsmm_preds <- lapply(1L:length(test_dat), function(protein_id) try({
-    #hsmm_preds <- parLapply(cl, 1L:50, function(protein_id) try({
-      #library(signal.hsmm)
+    #hsmm_preds <- lapply(1L:length(test_dat), function(protein_id) try({
+    hsmm_preds <- parLapply(cl, 1L:length(test_dat), function(protein_id) try({
+      library(signal.hsmm)
       unlist(predict.signal.hsmm(model_cv, test_dat[[protein_id]])[[1]][c("sp_probability", "sp_end")])
     }, silent = TRUE))
     
@@ -100,7 +100,9 @@ multifolds_cl_work <- pblapply(1L:4, function(dummy_variable) {
   })
 })
 
-#stopCluster(cl)
+stopCluster(cl)
 
-save(multifolds_cl_work, file = paste0(pathway, "cleave_pred4.RData"))
+
+save(multifolds_cl_work, file = "cleave_pred20.RData")
+
 

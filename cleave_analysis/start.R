@@ -10,3 +10,4 @@ if(Sys.info()["nodename"] == "MICHALKOMP" )
 
 if(Sys.info()["nodename"] == "phobos" )
   pathway <- "/home/michal/Dropbox/signal-peptide2_data/"
+
