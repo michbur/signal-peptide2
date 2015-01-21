@@ -2,6 +2,7 @@ library(seqinr)
 library(biogram)
 library(signal.hsmm)
 library(reshape2)
+library(ggplot2)
 
 # working directory ------------------------------
 

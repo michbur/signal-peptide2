@@ -1,0 +1,11 @@
+```{r echo=FALSE}
+source("start.R")
+load(paste0(pathway, "csdf.RData"))
+```
+
+
+```{r echo=FALSE}
+for(i in paste0("P", c(paste0(".", 4:1), 1L:4)))
+  print(ggplot(csdf, aes_string(x = i, fill = "positionf")) + 
+          geom_bar(aes(y = (..count..)/sum(..count..)), position = "dodge"))
+```

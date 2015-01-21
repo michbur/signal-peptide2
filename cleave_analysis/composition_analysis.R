@@ -11,8 +11,19 @@ csl <- sapply(pos_seqs, function(seq) attr(seq, "sig")[2])
 
 #csdf <- data.frame(apply(css, 2, l2n, seq_type = "prot"), csl)
 
-csdf <- data.frame(names(csl), do.call(cbind, lapply(1L:ncol(css), function(i)
-  data.frame(factor(css[, i], level = tolower(a())[-1])))), csl)
-colnames(csdf) <- c("prot", paste0("P", c(-4:-1, 1L:4)), "Position")
+csdf <- data.frame(names(csl), 
+                   do.call(cbind, lapply(1L:ncol(css), function(i)
+                     data.frame(factor(css[, i], level = tolower(a())[-1])))), 
+                   csl,
+                   cut(csl, c(6, 15, 24, 35, 89)))
 
-melt(csdf[1L:5, ])
+colnames(csdf) <- c("prot", paste0("P", c(paste0(".", 4:1), 1L:4)), "position", "positionf")
+
+ggplot(csdf, aes(x = position)) + geom_density() +
+  scale_x_continuous("Cleavage site position")
+
+summary(csdf[["position"]])
+table(csdf[["positionf"]])
+
+
+ggplot(csdf, aes(x = P.1, fill = positionf)) + geom_bar(position = "dodge")
