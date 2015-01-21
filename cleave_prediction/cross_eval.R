@@ -1,8 +1,6 @@
 #evaluation of cross-validation
 load(paste0(pathway, "cleave_pred100.RData"))
 
-single_cv <- multifolds_cl_work[[1]][[1]]
-
 #only predicted as positive
 sapply(multifolds_cl_work, function(five_cv)
   rowMeans(sapply(five_cv, function(single_cv) {
@@ -49,5 +47,13 @@ tcsdf <- data.frame(tcsdf,
 sapply(levels(tcsdf[["len_gr"]]), function(i)
   mean(tcsdf[tcsdf[["len_gr"]] == i, "sp_probability"]))
 
+#unreadable
+ggplot(tcsdf, aes(x = abs(sp_end - real), fill = len_gr)) + 
+  geom_density(alpha = 0.25)
+
 ggplot(tcsdf, aes(x = sp_probability, fill = len_gr)) + 
   geom_density(alpha = 0.25)
+
+#bad prediction for long signal peptides
+ggplot(tcsdf[tcsdf[["len_gr"]] == "(35,89]", ], aes(x = sp_probability, y = real)) +
+  geom_point()
