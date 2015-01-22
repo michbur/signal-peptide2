@@ -57,3 +57,16 @@ ggplot(tcsdf, aes(x = sp_probability, fill = len_gr)) +
 #bad prediction for long signal peptides
 ggplot(tcsdf[tcsdf[["len_gr"]] == "(35,89]", ], aes(x = sp_probability, y = real)) +
   geom_point()
+
+
+
+
+
+tmp_csdf <- csdf[, c(i, "positionf")]
+mtmp_csdf <- melt(sapply(levels(tmp_csdf[[2]]), function(pos_level)
+  table(tmp_csdf[tmp_csdf[[2]] == pos_level, 1])/sum(tmp_csdf[[2]] == pos_level)))
+print(ggplot(mtmp_csdf, aes(x = Var1, y = value, fill = Var2)) + 
+        geom_bar(stat = "identity", position = "dodge") + 
+        scale_y_continuous("Frequency") +
+        scale_y_discrete("Amino acid") +
+        scale_fill_discrete("Signal/npeptide/nposition"))

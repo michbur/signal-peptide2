@@ -1,11 +1,25 @@
 ```{r echo=FALSE}
 source("start.R")
 load(paste0(pathway, "csdf.RData"))
+library(xtable)
 ```
 
 
-```{r echo=FALSE}
-for(i in paste0("P", c(paste0(".", 4:1), 1L:4)))
-  print(ggplot(csdf, aes_string(x = i, fill = "positionf")) + 
-          geom_bar(aes(y = (..count..)/sum(..count..)), position = "dodge"))
+```{r echo=FALSE,results='asis'}
+for(i in paste0("P", c(paste0(".", 4:1), 1L:4))) {
+  tmp_csdf <- csdf[, c(i, "positionf")]
+  tmp_csdf <- sapply(levels(tmp_csdf[[2]]), function(pos_level)
+    table(tmp_csdf[tmp_csdf[[2]] == pos_level, 1])/sum(tmp_csdf[[2]] == pos_level))
+  print(xtable(tmp_csdf, 
+               paste0("Amino acid frequency for position ", sub(".", "-", i, fixed = TRUE),
+                      ".")),
+        type = "html")
+  mtmp_csdf <- melt(tmp_csdf)
+  print(ggplot(mtmp_csdf, aes(x = Var1, y = value, fill = Var2)) + 
+          geom_bar(stat = "identity", position = "dodge", name = "Frequency") + 
+          scale_y_continuous(name = "Frequency") +
+          scale_x_discrete("Amino acid") +
+          scale_fill_discrete("Signal\npeptide\nposition") +
+          ggtitle(sub(".", "-", i, fixed = TRUE)))
+  }
 ```
