@@ -19,7 +19,7 @@ neg_ids <- cvFolds(length(neg_seqs), K = 5)
 cl <- makeCluster(4, type = "SOCK")
 clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision", "degenerate"))
 
-multifolds_cl_work <- pblapply(1L:5, function(dummy_variable) { 
+multifolds_cl_work <- pblapply(1L:100, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs[sample(1L:length(neg_seqs), length(pos_seqs))]
   
@@ -76,7 +76,6 @@ multifolds_cl_work <- pblapply(1L:5, function(dummy_variable) {
       library(signal.hsmm)
       unlist(predict.signal.hsmm(model_cv, test_dat[[protein_id]])[[1]][c("sp_probability", "sp_end")])
     }, silent = TRUE))
-    browser()
     res <- t(sapply(1L:length(hsmm_preds), function(protein_id)
       c(if(class(hsmm_preds[[protein_id]]) == "try-error") {
         c(NA, NA, NA)
@@ -105,6 +104,6 @@ multifolds_cl_work <- pblapply(1L:5, function(dummy_variable) {
 stopCluster(cl)
 
 
-save(multifolds_cl_work, file = "cleave_pred5.RData")
+save(multifolds_cl_work, file = "cleave_pred100.RData")
 
 
