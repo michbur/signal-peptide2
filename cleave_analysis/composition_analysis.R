@@ -27,3 +27,13 @@ table(csdf[["positionf"]])
 
 
 ggplot(csdf, aes(x = P.1, fill = positionf)) + geom_bar(position = "dodge")
+
+position ~ positionf
+ggplot(csdf, aes(x = position, fill = positionf)) + geom_density()
+
+lapply(levels(csdf[["positionf"]]), function(i) {
+  res <- data.frame(table(csdf[csdf[["positionf"]] == i, "position"]))
+  res <- cbind(res, res[[2]]/nrow(csdf))
+  colnames(res) <- c("Cleave position", "Number of proteins", "Frequency")
+  res
+})
