@@ -2,13 +2,23 @@
 load(paste0(pathway, "cleave_pred100.RData"))
 
 #only predicted as positive
-sapply(multifolds_cl_work, function(five_cv)
+rowMeans(sapply(multifolds_cl_work, function(five_cv)
   rowMeans(sapply(five_cv, function(single_cv) {
     real_cs <- single_cv[single_cv[, 1] > 0.5 & !is.na(single_cv[, 4]), 4]
     hsmm_cs <- single_cv[single_cv[, 1] > 0.5 & !is.na(single_cv[, 4]), 2]
     rf_cs <- single_cv[single_cv[, 1] > 0.5 & !is.na(single_cv[, 4]), 3]
     c(mean(sqrt((real_cs - hsmm_cs)^2)), mean(sqrt((real_cs - rf_cs)^2)))
-  })))
+  }))))
+
+tmp <- do.call(c, lapply(multifolds_cl_work, function(five_cv)
+  do.call(c, lapply(five_cv, function(single_cv) {
+    real_cs <- single_cv[single_cv[, 1] > 0.5 & !is.na(single_cv[, 4]), 4]
+    hsmm_cs <- single_cv[single_cv[, 1] > 0.5 & !is.na(single_cv[, 4]), 2]
+    rf_cs <- single_cv[single_cv[, 1] > 0.5 & !is.na(single_cv[, 4]), 3]
+    real_cs - hsmm_cs
+  }))))
+
+plot(density(tmp - 1))
 
 #all really positive
 rowMeans(sapply(multifolds_cl_work, function(five_cv)
@@ -18,6 +28,18 @@ rowMeans(sapply(multifolds_cl_work, function(five_cv)
     rf_cs <- single_cv[!is.na(single_cv[, 4]), 3]
     c(mean(sqrt((real_cs - hsmm_cs)^2)), mean(sqrt((real_cs - rf_cs)^2)))
   }))))
+
+#all really positive and shorter than 35
+rowMeans(sapply(multifolds_cl_work, function(five_cv)
+  rowMeans(sapply(five_cv, function(single_cv) {
+    real_cs <- single_cv[single_cv[, 1] > 0.5 & !is.na(single_cv[, 4] & single_cv[, "real"] < 35), 4]
+    hsmm_cs <- single_cv[single_cv[, 1] > 0.5 & !is.na(single_cv[, 4] & single_cv[, "real"] < 35), 2]
+    rf_cs <- single_cv[single_cv[, 1] > 0.5 & !is.na(single_cv[, 4] & single_cv[, "real"] < 35), 3]
+    c(mean(sqrt((real_cs - hsmm_cs)^2)), mean(sqrt((real_cs - rf_cs)^2)))
+  }))))
+
+
+
 #hsmm + rf is subpar to only hsmm
 
 #1L:10, because of the slow machine
