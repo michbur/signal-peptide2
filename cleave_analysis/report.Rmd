@@ -1,12 +1,24 @@
-```{r echo=FALSE}
+```{r echo=FALSE,message=FALSE}
 source("start.R")
 load(paste0(pathway, "csdf.RData"))
 library(xtable)
 ```
 
+# Types of signal peptides
+
+Signal peptides vary greatly in length, so I decided to split them into four groups:
+
+```{r echo=FALSE,results='asis'}
+res <- data.frame(aggregate(position ~ positionf, csdf, length))
+#add here frequencies
+colnames(res) <- c("Length group", "Number of proteins")
+print(xtable(res), type = "html", include.rownames = FALSE)
+```
+
 
 ```{r echo=FALSE,results='asis'}
 for(i in paste0("P", c(paste0(".", 4:1), 1L:4))) {
+  cat("\n\n# Position", sub(".", "-", i, fixed = TRUE), "  \n\n")
   tmp_csdf <- csdf[, c(i, "positionf")]
   tmp_csdf <- sapply(levels(tmp_csdf[[2]]), function(pos_level)
     table(tmp_csdf[tmp_csdf[[2]] == pos_level, 1])/sum(tmp_csdf[[2]] == pos_level))
