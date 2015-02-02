@@ -16,8 +16,17 @@ csdf <- data.frame(names(csl),
                      data.frame(factor(css[, i], level = tolower(a())[-1])))), 
                    csl,
                    cut(csl, c(6, 15, 24, 35, 89)))
-
 colnames(csdf) <- c("prot", paste0("P", c(paste0(".", 4:1), 1L:4)), "position", "positionf")
+
+#aminoacid composition
+aa_comp <- t(sapply(pos_seqs, function(ith_seq) {
+  data.frame(table(factor(ith_seq[attr(ith_seq, "sig")[2]:length(ith_seq)], 
+                          levels = a()[-1])))[, "Freq"]/length(ith_seq)
+}))
+colnames(aa_comp) <- a()[-1]
+
+csdf <- cbind(csdf, aa_comp)
+save(csdf, file = "csdf.RData")
 
 ggplot(csdf, aes(x = position)) + geom_density() +
   scale_x_continuous("Cleavage site position") +
