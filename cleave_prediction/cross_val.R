@@ -19,7 +19,7 @@ neg_ids <- cvFolds(length(neg_seqs), K = 5)
 cl <- makeCluster(4, type = "SOCK")
 clusterExport(cl, c("predict.signal.hsmm", "signal.hsmm_decision", "degenerate"))
 
-multifolds_cl_work <- pblapply(1L:80, function(dummy_variable) { 
+multifolds_cl_work <- pblapply(1L:170, function(dummy_variable) { 
   pos_ids <- cvFolds(length(pos_seqs), K = 5)
   cv_neg <- neg_seqs[sample(1L:length(neg_seqs), length(pos_seqs))]
   
@@ -104,6 +104,6 @@ multifolds_cl_work <- pblapply(1L:80, function(dummy_variable) {
 stopCluster(cl)
 
 
-save(multifolds_cl_work, file = "cleave_pred80names.RData")
+save(multifolds_cl_work, file = "cleave_pred170names.RData")
 
 
