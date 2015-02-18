@@ -32,7 +32,7 @@ ggplot(csdf, aes(x = position)) + geom_density() +
   scale_x_continuous("Cleavage site position") +
   geom_vline(xintercept = 15, colour = "red") +
   geom_vline(xintercept = 34, colour = "red")
-  
+
 
 
 
