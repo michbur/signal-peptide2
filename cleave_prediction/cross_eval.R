@@ -1,3 +1,4 @@
+#old version no protein names here
 #evaluation of cross-validation
 load(paste0(pathway, "cleave_pred100.RData"))
 
