@@ -26,11 +26,28 @@ csdf <- data.frame(cs_tab, sp = as.factor(as.numeric(!is.na(cs_tab[["real"]]))),
 #sp length versus prediction succes -----------------------------
 #true cleavage site data frame
 tcsdf <- csdf[!is.na(cs_tab[["real"]]), c("sp_probability", "sp_end", "real")]
+#write.csv2(tcsdf, file = "tcsdf_poster.csv")
 
-round(median(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] + 1)), 4)
 
-ggplot(tcsdf, aes(x = abs(sp_end - real + 1))) + 
-  geom_histogram() + 
-  scale_y_continuous(name = "Density") +
+poster_data <- list(mean = mean(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1)),
+                    median = mean(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1)),
+                    position_table = data.frame(table(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1))),
+                    metrics = do.call(cbind, lapply(multifolds_cl_work, function(five_cv)
+                      sapply(five_cv, function(single_cv) 
+                        #lets omit random forest predition
+                        HMeasure(!is.na(single_cv[, "real"]), single_cv[, "sp_probability"])[["metrics"]]
+                      ))))
+
+tmp <- data.frame(table(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1)))
+
+ggplot(tmp, aes(x = Var1, y = Freq)) + 
+  geom_bar(stat = "identity") + 
+  scale_y_discrete(name = "Density") +
   scale_x_continuous("Cleavage site error") + 
   xlim(0, 30)
+
+
+
+
+
+tmp <- HMeasure(csdf[["sp"]], csdf[["sp_probability"]])
