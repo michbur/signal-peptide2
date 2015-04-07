@@ -37,20 +37,3 @@ poster_data <- list(mean = mean(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1)),
                         #lets omit random forest predition
                         unlist(HMeasure(!is.na(single_cv[, "real"]), single_cv[, "sp_probability"])[["metrics"]])
                       ))})))
-
-
-
-
-tmp <- data.frame(table(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1)))
-
-ggplot(tmp, aes(x = Var1, y = Freq)) + 
-  geom_bar(stat = "identity") + 
-  scale_y_discrete(name = "Density") +
-  scale_x_continuous("Cleavage site error") + 
-  xlim(0, 30)
-
-
-
-
-
-tmp <- HMeasure(csdf[["sp"]], csdf[["sp_probability"]])
