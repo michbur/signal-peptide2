@@ -8,6 +8,7 @@ library(biogram)
 library(signal.hsmm)
 library(randomForest)
 library(ggplot2)
+library(hmeasure)
 
 # working directory ------------------------------
 
