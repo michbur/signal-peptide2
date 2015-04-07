@@ -30,7 +30,7 @@ tcsdf <- csdf[!is.na(cs_tab[["real"]]), c("sp_probability", "sp_end", "real")]
 
 
 poster_data <- list(mean = mean(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1)),
-                    median = mean(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1)),
+                    median = median(abs(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1)),
                     position_table = data.frame(table(tcsdf[["real"]] - tcsdf[["sp_end"]] - 1)),
                     metrics = do.call(cbind, lapply(multifolds_cl_work, function(five_cv) {
                       rowMeans(sapply(five_cv, function(single_cv) 
