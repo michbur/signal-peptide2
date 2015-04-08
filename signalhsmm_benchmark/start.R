@@ -1,3 +1,16 @@
+library(hmeasure)
+library(signal.hsmm)
+
+# working directory ------------------------------
+
+if(Sys.info()["nodename"] == "MICHALKOMP" )
+  pathway <- "C:/Users/Michal/Dropbox/signal-peptide2_data/"
+
+if(Sys.info()["nodename"] == "phobos" )
+  pathway <- "/home/michal/Dropbox/signal-peptide2_data/"
+
+# functions --------------------
+
 read_predtat <- function(connection) {
   all_lines <- readLines(connection)
   #get decisions
@@ -96,6 +109,6 @@ read_philius <- function(connection) {
                     sig.start = ifelse(cleaved, 1, NA),
                     sig.end = rep(NA, length(seq_dat_id)),
                     row.names = unlist(all_dat[1L:(length(all_dat)/2)*2 - 1]))
-  res[cleaved, "sig.end"] <- as.numeric(sapply(table_dat[cleaved], function(i) i[2]))
+  res[cleaved, "sig.end"] <- as.numeric(sapply(table_dat[cleaved], function(i) i[2])) - 1
   res
 }
