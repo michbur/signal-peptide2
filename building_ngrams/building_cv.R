@@ -70,4 +70,4 @@ res <- lapply(1L:20, function(repetition) {
   })
 })
 
-save(res, file = paste0(pathway, "build_cleave_20names.RData"))
+save(res, file = paste0(pathway, "build_cleave_20.RData"))
