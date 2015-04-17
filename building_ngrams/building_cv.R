@@ -40,10 +40,10 @@ neg_id <- which(tar == 0)
 
 #here fold lapply
 
-res <- lapply(1L:20, function(repetition) {
+res <- pblapply(1L:10, function(repetition) {
   folds_pos <- cvFolds(length(pos_id), type = "random")
   folds_neg <- cvFolds(length(neg_id), type = "random")
-  pblapply(1L:5, function(fold) {
+  lapply(1L:5, function(fold) {
     pos_train <- folds_pos[["subsets"]][folds_pos[["which"]] == fold]
     pos_test <- folds_pos[["subsets"]][folds_pos[["which"]] != fold]
     
