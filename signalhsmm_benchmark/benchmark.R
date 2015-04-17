@@ -28,8 +28,8 @@ bench_list <- list(phobius = read_phobius("./signalhsmm_benchmark/eval_phobius.t
                    signalhsmm2010 = signal.hsmm2010_preds,
                    signalhsmm1987 = signal.hsmm1987_preds)
 
-bench_list[["signalhsmm2010"]][["sig.end"]] <- bench_list[["signalhsmm2010"]][["sig.end"]] + 1
-bench_list[["signalhsmm1987"]][["sig.end"]] <- bench_list[["signalhsmm1987"]][["sig.end"]] + 1
+bench_list[["signalhsmm2010"]][["sig.end"]] <- bench_list[["signalhsmm2010"]][["sig.end"]] - 1
+bench_list[["signalhsmm1987"]][["sig.end"]] <- bench_list[["signalhsmm1987"]][["sig.end"]] - 1
 
 positions <- sapply(bench_list, function(predictor)
   mean(abs(cleave_sites[is_signal & predictor[["signal.peptide"]] > 0.5] - 
@@ -43,5 +43,8 @@ benchmark_dat <- data.frame(metrics, positions = positions)
 save(benchmark_dat, file = "benchmark_dat.RData")
 
 
-
+lapply(bench_list[6L:7], function(predictor)
+  cleave_sites[is_signal & predictor[["signal.peptide"]] > 0.5] - 2 -
+             predictor[is_signal & predictor[["signal.peptide"]] > 0.5, "sig.end"]
+  )
 
