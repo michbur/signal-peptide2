@@ -40,10 +40,10 @@ neg_id <- which(tar == 0)
 
 #here fold lapply
 
-res <- pblapply(1L:10, function(repetition) {
+res2 <- pblapply(1L:2, function(repetition) {
   folds_pos <- cvFolds(length(pos_id), type = "random")
   folds_neg <- cvFolds(length(neg_id), type = "random")
-  lapply(1L:5, function(fold) {
+  try({lapply(1L:5, function(fold) {
     pos_train <- folds_pos[["subsets"]][folds_pos[["which"]] == fold]
     pos_test <- folds_pos[["subsets"]][folds_pos[["which"]] != fold]
     
@@ -67,7 +67,7 @@ res <- pblapply(1L:10, function(repetition) {
             test_models(pos_test, neg_train, all_data, constr[[n]], no_gap),
             test_models(pos_test, neg_test, all_data, constr_gap[[n]], gap))
     })
-  })
+  }}, silent = TRUE)
 })
 
 save(res, file = paste0(pathway, "build_cleave_20.RData"))
