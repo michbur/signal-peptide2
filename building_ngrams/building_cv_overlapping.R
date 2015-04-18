@@ -1,3 +1,5 @@
+#very hard data set - overlapping peptides
+
 pos_seqs <- read_uniprot(paste0(pathway, "sept_signal.txt"), euk = TRUE)
 neg_seqs <- read.fasta(paste0(pathway, "sept_neg.fasta"), seqtype = "AA")
 #remove sequences with atypical aminoacids
@@ -40,7 +42,7 @@ neg_id <- which(tar == 0)
 
 #here fold lapply
 
-res2 <- pblapply(1L:2, function(repetition) {
+system.time(res2 <- pblapply(1L:2, function(repetition) {
   folds_pos <- cvFolds(length(pos_id), type = "random")
   folds_neg <- cvFolds(length(neg_id), type = "random")
   try({lapply(1L:5, function(fold) {
@@ -68,6 +70,6 @@ res2 <- pblapply(1L:2, function(repetition) {
             test_models(pos_test, neg_test, all_data, constr_gap[[n]], gap))
     })
   })}, silent = TRUE)
-})
+}))
 
-save(res, file = paste0(pathway, "build_cleave_20.RData"))
+save(res2, file = paste0(pathway, "build_cleave_2.RData"))
