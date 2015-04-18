@@ -67,7 +67,7 @@ res2 <- pblapply(1L:2, function(repetition) {
             test_models(pos_test, neg_train, all_data, constr[[n]], no_gap),
             test_models(pos_test, neg_test, all_data, constr_gap[[n]], gap))
     })
-  }}, silent = TRUE)
+  })}, silent = TRUE)
 })
 
 save(res, file = paste0(pathway, "build_cleave_20.RData"))
