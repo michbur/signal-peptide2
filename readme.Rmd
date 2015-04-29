@@ -8,3 +8,7 @@ Date: `r format(Sys.Date(), format="%B %d %Y")`
 Every directory should have:  
 1. start.R file sourcing all auxillary functions and packages. It should also set a proper working directory.    
 2. readme.md with more or less brief explanation.  
+
+### Final decision
+
+Disappointed with my inability to stick with my own rules, workspace management and so on, I decided to cease the work in this repo.
